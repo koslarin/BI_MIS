@@ -51,25 +51,6 @@ Plug_normal =  function(mcmc_samples = 4000, burn_in = 2000, y, x, zeta_ppd, lik
    
     ##
     
-    for (i in 1:N) {
-      #sum up log densities to get log-likelihood for the weights
-      if (beta_params <= 2) {
-        log_lik[i,] = dnorm(X[,1:(beta_params-1)]*beta_prev[1:(beta_params-1)] + zeta_ppd[i,]*beta_prev[beta_params], mean = y, 
-                                                            sd= sqrt(sigma_y_sq), log = TRUE) 
-      } else {
-        log_lik[i,] = dnorm(X[,1:(beta_params-1)]%*%beta_prev[1:(beta_params-1)] + zeta_ppd[i,]*beta_prev[beta_params], mean = y, 
-                            sd= sqrt(sigma_y_sq), log = TRUE)
-      }
-      
-      
-    }
-    
-    log_lik_modded = log_lik - 
-      apply(log_lik, 2, max) # max by column (i.e. S different values)
-    
-    
-    prob_zeta= exp(log_lik_modded)
-    
     # save the results.
     if (j > burn_in) {
       matrix_beta_out[j-burn_in, ] <- beta_prev[1:(ncol(X)-1)]
