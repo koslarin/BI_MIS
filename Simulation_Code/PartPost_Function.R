@@ -102,7 +102,7 @@ PartPost_normal_nonridge =  function(mcmc_samples = 4000, burn_in = 2000, y, x, 
     
     Q_B = Xar + sigma_y_sq/sigma_sq_beta_prior*diag(ncol(X))
     inv_Q_B = solve(Q_B)
-    l_B = tau*t(X) %*%y
+    l_B = t(X) %*%y
     ch_Q = chol(Q_B)
     
     beta_prev = mvrnorm(n = 1, inv_Q_B %*% l_B, Sigma = sigma_y_sq*inv_Q_B)
