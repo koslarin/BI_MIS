@@ -9,7 +9,7 @@ library(truncdist)
 #If you believe the standard empirical covariance matrix to be unstable, we recommend to set unstable_covariance_mat to 1,
 #That makes it possible to calculate the inverse matrices outside the loop using a different method, 
 #e.g using e.g. clime() function in the clime package
-#and input precision matrices (Sigma_inv_dif) directly into the function
+#and input precision matrices (Sigma_part_inv and Sigma_part_0_inv) directly into the function
 
 AIS_fun = function(mcmc_samples = 4000, burn_in = 2000, R = 100, y, x, zeta_ppd, 
                                 alpha_g_pr_y = 0.01, beta_g_pr_y = 0.01,
