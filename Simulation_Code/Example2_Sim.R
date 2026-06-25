@@ -1,7 +1,6 @@
 
 #### Simulating Code for Ex2: Correlated Scenario, rho = 0.3
 
-set.seed(2023)
 Runs=100
 
 n <- 200
