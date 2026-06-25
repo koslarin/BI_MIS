@@ -3,15 +3,14 @@
 
 ### Ridge version
 
-Plug_fun =  function(mcmc_samples = 4000, burn_in = 2000, y, x, zeta_ppd,
+Plug_fun =  function(mcmc_samples = 4000, burn_in = 2000, y, x, plug_in_zeta,
                alpha_g_pr_y = 0.01, beta_g_pr_y = 0.01, intercept = TRUE, 
-                  tau = 1/runif(1, 0.05,3)^2,ridge = 1, sigma_sq_theta_prior = 1000^2) {
+                tau = 1/runif(1, 0.05,3)^2, ridge = 1, 
+               eta_beta = 1, A = 1000, sigma_sq_beta_prior = 1000^2) {
   n = length(y)
   S = mcmc_samples
-  N = nrow(zeta_ppd)
-  zeta_ppd_mean = colMeans(zeta_ppd)
   
-  X = cbind(x, zeta_ppd_mean) 
+  X = cbind(x, plug_in_zeta) 
   
   beta_params = ncol(X)
   

@@ -4,7 +4,7 @@ library(truncdist)
 
 
 #ridge =1 corresponds to a ridge prior on beta with a shrinkage parameter σθ ∼U(0,1000), 
-#ridge = 0 to a normal prior on beta ~ N(0,sigma_sq_theta_prior)
+#ridge = 0 to a normal prior on beta ~ N(0,sigma_sq_beta_prior)
 
 #If you believe the standard empirical covariance matrix to be unstable, we recommend to set unstable_covariance_mat to 1,
 #That makes it possible to calculate the inverse matrices outside the loop using a different method, 
@@ -14,7 +14,7 @@ library(truncdist)
 AIS_fun = function(mcmc_samples = 4000, burn_in = 2000, R = 100, y, x, zeta_ppd, 
                                 alpha_g_pr_y = 0.01, beta_g_pr_y = 0.01,
                                 tau = NULL, ridge = 1, 
-                                eta_beta = 1, A = 1000, sigma_sq_theta_prior = 1000^2,
+                                eta_beta = 1, A = 1000, sigma_sq_beta_prior = 1000^2,
                                 unstable_covariance_mat = 0, 
                                Sigma_part_inv = NULL, Sigma_part_0_inv = NULL) {
   n <- length(y)

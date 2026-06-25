@@ -5,8 +5,8 @@
 IIS_fun = function(mcmc_samples = 4000, burn_in = 2000, y, x, zeta_ppd, 
                                  alpha_g_pr_y = 0.01, beta_g_pr_y = 0.01,
                                  tau = NULL, ridge = 1, #ridge =1 corresponds to a ridge prior on beta with a shrinkage parameter σθ ∼U(0,1000), 
-                                 #ridge = 0 to a normal prior on beta ~ N(0,sigma_sq_theta_prior)
-                                 eta_beta = 1, A = 1000, sigma_sq_theta_prior = 1000^2) {
+                                 #ridge = 0 to a normal prior on beta ~ N(0,sigma_sq_beta_prior)
+                                 eta_beta = 1, A = 1000, sigma_sq_beta_prior = 1000^2) {
   n <- length(y)
   S <- mcmc_samples
   N <- nrow(zeta_ppd) # number of available draws
