@@ -21,7 +21,7 @@ meas_err_model_sim =  function(n = 200, n_draws = 1000, zeta_mean = 0, sd_zeta =
   
   zeta_ppd_draws <- matrix(data = NA, nrow = n_draws, ncol = n)
   Sigma_part = solve(zeta_cov_matrix_inv+z_cov_matrix_inv)
-  mu_part = Sigma_part%*%( z_cov_matrix_inv%*%z + zeta_cov_matrix_inv%*%rep(zeta_mean,n)))
+  mu_part = Sigma_part%*%( z_cov_matrix_inv%*%z + zeta_cov_matrix_inv%*%rep(zeta_mean,n))
   
   zeta_ppd_draws = mvrnorm(n=n_draws, mu = mu_part, Sigma = Sigma_part)
   
