@@ -1,6 +1,6 @@
 library(BayesLogit)
 
-# --- 1. Initialization Function ---
+# --- Negative Binomial: Initialization Function ---
 init_params_negbin = function(y, x = NULL, zeta_ppd) {
   p_x <- if (is.null(x)) 0 else ncol(as.matrix(x))
   list(
@@ -10,7 +10,7 @@ init_params_negbin = function(y, x = NULL, zeta_ppd) {
   )
 }
 
-# --- 2. Likelihood Function ---
+# --- Negative Binomial: Likelihood Function ---
 lik_fun_negbin = function(y, x = NULL, zeta_ppd, params) {
   N <- nrow(zeta_ppd)
   n <- ncol(zeta_ppd)
@@ -28,7 +28,7 @@ lik_fun_negbin = function(y, x = NULL, zeta_ppd, params) {
   )
 }
 
-# --- Helper: Slice Sampler for Dispersion Parameter r ---
+# --- Negative Binomial: Slice Sampler for Dispersion Parameter r ---
 slice_sample_r = function(r_curr, y, eta, e0 = 0.01, a_r = 0.001, b_r = 100) {
   log_post = function(r) {
     if (r <= a_r || r >= b_r) return(-Inf)
@@ -49,7 +49,7 @@ slice_sample_r = function(r_curr, y, eta, e0 = 0.01, a_r = 0.001, b_r = 100) {
   }
 }
 
-# --- 3. Gibbs Parameter Sampler ---
+# --- Negative Binomial: Gibbs Parameter Sampler ---
 sample_params_negbin = function(y, x = NULL, zeta_sam, params, 
                                 prior_prec = 0.001, e0 = 0.01, 
                                 a_r = 0.001, b_r = 100) {

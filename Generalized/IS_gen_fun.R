@@ -14,9 +14,6 @@ gen_IS_fun = function(y, x = NULL, sample_params, init_params, lik_fun = NULL,
   n <- length(y)
   M <- mcmc_samples
   
-  # Sort Stage 1 draws per column once for fast ECDF lookup
-  sorted_zeta_ppd <- apply(zeta_ppd, 2, sort)
-  
   # --- 1. Handle Plug-in vs. Sampling Modes for Zeta ---
   if (model == "plugin") {
     if (is.matrix(zeta_ppd)) {
@@ -143,7 +140,7 @@ gen_IS_fun = function(y, x = NULL, sample_params, init_params, lik_fun = NULL,
 }
 
 
-# Interface 1: Parameter Initializer
+# Gaussian: Parameter Initializer
 init_params_normal = function(y, x = NULL, zeta_ppd) {
   if (is.null(x)) {
     beta_val <- numeric(0)
@@ -159,7 +156,7 @@ init_params_normal = function(y, x = NULL, zeta_ppd) {
   )
 }
 
-# Interface 2: Stage-2 Parameter Gibbs Sampler
+# Gaussian: Stage-2 Parameter Gibbs Sampler
 sample_params_normal = function(y, x = NULL, zeta_sam, params, prior_prec = 0.001, alpha_0 = 0.01, beta_0 = 0.01) {
   n <- length(y)
   
@@ -197,7 +194,7 @@ sample_params_normal = function(y, x = NULL, zeta_sam, params, prior_prec = 0.00
   )
 }
 
-# Interface 3: Log-Likelihood Evaluator
+# Gaussian: Log-Likelihood Evaluator
 lik_fun_normal = function(y, x = NULL, zeta_ppd, params) {
   S <- nrow(zeta_ppd)
   n <- ncol(zeta_ppd)
@@ -264,7 +261,7 @@ sample_zeta_ais = function(log_lik, zeta_ppd, mu_part, Sigma_inv_dif, log_sqrt_d
 }
 
 
-# Helper 1: Transform candidate values to Z-space via ECDFs
+# Helper function: Transform candidate values to Z-space via ECDFs
 transform_to_z = function(zeta_mat, sorted_zeta_ppd) {
   N <- nrow(sorted_zeta_ppd)
   n <- ncol(sorted_zeta_ppd)
@@ -294,7 +291,7 @@ transform_to_z = function(zeta_mat, sorted_zeta_ppd) {
   return(stats::qnorm(U_mat))
 }
 
-# Helper 2: Vecchia AIS Sampler Module
+# Helper AIS_copula: Vecchia AIS Sampler Module
 sample_zeta_ais_copula_vecchia = function(log_lik, zeta_ppd, sorted_zeta_ppd, locs, 
                                           covparms, NNarray, R = 300, m = 20) {
   S <- nrow(zeta_ppd)
@@ -330,7 +327,7 @@ sample_zeta_ais_copula_vecchia = function(log_lik, zeta_ppd, sorted_zeta_ppd, lo
       NNarray = NNarray
     )
     
-    # Robust extraction handling both list and numeric returns
+    # Robust extraction for both list and numeric returns
     log_joint_vecchia <- if (is.list(val_vecchia)) val_vecchia$loglik else as.numeric(val_vecchia)
     
     # Independent N(0,1) log-density denominator
@@ -373,11 +370,11 @@ setup_copula_cache <- function(zeta_ppd, locs, m_vecchia = 20, nugget_prop = 0.1
   
   # --- 4. Standardize Variance & Inject Nugget Floor ---
   # In Z-space, total marginal variance must equal 1.0.
-  # We partition variance into: Partial Sill (1 - nugget_prop) + Nugget (nugget_prop)
+  # Partition variance into: Partial Sill (1 - nugget_prop) + Nugget (nugget_prop)
   covparms_adjusted <- c(
-    variance = 1.0 - nugget_prop,  # Partial sill (e.g., 0.90)
+    variance = 1.0 - nugget_prop,  # Partial sill (here, 0.90)
     range    = fitted_range,       # Fitted spatial scale
-    nugget   = nugget_prop         # Nugget floor (e.g., 0.10)
+    nugget   = nugget_prop         # Nugget floor (here, 0.10)
   )
   
   list(
