@@ -1,8 +1,8 @@
 ---
 title: "Descriptions of Generalized IS Functions"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 header-includes: \usepackage{bm}
 ---
 
@@ -346,7 +346,7 @@ setup_copula_cache(zeta_ppd, locs, m_vecchia = 20, nugget_prop = 0.10)
 * **zeta_ppd**: A numeric matrix of dimension `S × n` containing Stage 1 partial posterior draws.
 * **locs**: A numeric matrix of dimension `n × 2` specifying spatial coordinates.
 * **m_vecchia**: An integer defining the maximum number of nearest neighbors utilized in the Vecchia approximation for spatial covariance likelihood calculation. Defaults to 20.
-* **nugget_prop**: A numeric scalar in `[0,1)` defining the proportion of total Z-space marginal variance allocated to the nugget floor. Defaults to `0.10` (10% nugget). used to prevent over-smoothing.
+* **nugget_prop**: A numeric scalar in `[0,1)` defining the proportion of total Z-space marginal variance allocated to the nugget floor. Defaults to `0.10` (10% nugget). Used to prevent slope attenuation.
 
 ### Value 
 

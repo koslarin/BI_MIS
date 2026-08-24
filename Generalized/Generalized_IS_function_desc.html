@@ -613,7 +613,7 @@ draw of <span class="math inline">\(\zeta\)</span> from
 <div id="transform_to_z" class="section level1">
 <h1><code>transform_to_z</code></h1>
 <p>Transforms candidate <span class="math inline">\(\zeta\)</span> draws
-from their original scale into standard Gaussian latent variables <span class="math inline">\(Z∼N(0,1)\)</span>. Uses a continuous
+from their original scale into standard Gaussian latent variables <span class="math inline">\(Z~N(0,1)\)</span>. Uses a continuous
 piecewise-linear Probability Integral Transform (PIT) via empirical CDF
 interpolation.</p>
 <div id="usage-6" class="section level3">
@@ -848,8 +848,8 @@ of nearest neighbors utilized in the Vecchia approximation for spatial
 covariance likelihood calculation. Defaults to 20.</li>
 <li><strong>nugget_prop</strong>: A numeric scalar in <code>[0,1)</code>
 defining the proportion of total Z-space marginal variance allocated to
-the nugget floor. Defaults to <code>0.10</code> (10% nugget). used to
-prevent over-smoothing.</li>
+the nugget floor. Defaults to <code>0.10</code> (10% nugget). Used to
+prevent slope attenuation.</li>
 </ul>
 </div>
 <div id="value-12" class="section level3">
