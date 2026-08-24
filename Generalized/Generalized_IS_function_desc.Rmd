@@ -1,14 +1,22 @@
 ---
 title: "Descriptions of Generalized IS Functions"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 header-includes: \usepackage{bm}
 ---
 
 # `gen_IS_fun`
 
-Generalized function for running plug-in posteriors, IIS, and AIS.
+gen_IS_fun implements a two-stage Bayesian Markov Chain Monte Carlo (MCMC) sampling framework for models with not fully observed covarite $\zeta$ using Importance Sampling (IS) and Copula-based approximations. 
+The function supports four sampling algorithms specified via the model parameter:
+
+* "plugin": Fixes $\zeta$ to its Stage 1 posterior mean (or other point estimate) across all iterations.
+* "IIS" (Independent Importance Sampling)
+* "AIS" (Adjusted Importance Sampling)
+* "AIS_copula" (Copula + Vecchia AIS)
+
+gen_IS_fun is modular and model-agnostic, accepting user-defined likelihood (lik_fun), parameter initialization (init_params), and sampling (sample_params) functions—enabling seamless adaptation between Gaussian, Negative Binomial (Polya-Gamma), and other non-Gaussian response distributions.
 
 ### Usage
 
@@ -39,7 +47,7 @@ gen_IS_fun(y,
   + "IIS": Independent Importance Sampling.
   + "AIS": Adjusted Importance Sampling.
   + "AIS_copula": Adjusted Importance Sampling with continuous Empirical CDF transformation, spatial Gaussian Copula, and Vecchia likelihood re-weighting.
-* **zeta_ppd**: A numeric matrix of dimension `S × n` containing `S` posterior predictive draws of unobserved variable $\zeta$ obtained from Stage 1.
+* **zeta_ppd**: A numeric matrix of dimension `S × n` containing `S` posterior predictive draws of unobserved variable $\zeta$ obtained from Stage 1. For "plugin", may also be a numeric vector of length `n` containing a point estimate of $\zeta$ obtained from Stage 1.
 * **locs**: A numeric matrix of dimension `n × 2` specifying spatial coordinates $(x_1, x_2)$ for each location. Used only when model = "AIS_copula".
 * **R**: An integer defining the number of discrete candidate draws resampled in the second sampling stage of AIS. Defaults to 300.
 * **m_vecchia**: An integer defining the maximum number of nearest neighbors utilized in the Vecchia approximation for spatial covariance likelihood calculation. Defaults to 20. Used only when model = "AIS_copula".

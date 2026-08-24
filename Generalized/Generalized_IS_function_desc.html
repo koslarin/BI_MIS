@@ -362,8 +362,24 @@ Functions</h1>
 
 <div id="gen_is_fun" class="section level1">
 <h1><code>gen_IS_fun</code></h1>
-<p>Generalized function for running plug-in posteriors, IIS, and
-AIS.</p>
+<p>gen_IS_fun implements a two-stage Bayesian Markov Chain Monte Carlo
+(MCMC) sampling framework for models with not fully observed covarite
+<span class="math inline">\(\zeta\)</span> using Importance Sampling
+(IS) and Copula-based approximations. The function supports four
+sampling algorithms specified via the model parameter:</p>
+<ul>
+<li>“plugin”: Fixes <span class="math inline">\(\zeta\)</span> to its
+Stage 1 posterior mean (or other point estimate) across all
+iterations.</li>
+<li>“IIS” (Independent Importance Sampling)</li>
+<li>“AIS” (Adjusted Importance Sampling)</li>
+<li>“AIS_copula” (Copula + Vecchia AIS)</li>
+</ul>
+<p>gen_IS_fun is modular and model-agnostic, accepting user-defined
+likelihood (lik_fun), parameter initialization (init_params), and
+sampling (sample_params) functions—enabling seamless adaptation between
+Gaussian, Negative Binomial (Polya-Gamma), and other non-Gaussian
+response distributions.</p>
 <div id="usage" class="section level3">
 <h3>Usage</h3>
 <pre class="r"><code>gen_IS_fun(y, 
@@ -411,7 +427,8 @@ re-weighting.</li>
 <li><strong>zeta_ppd</strong>: A numeric matrix of dimension
 <code>S × n</code> containing <code>S</code> posterior predictive draws
 of unobserved variable <span class="math inline">\(\zeta\)</span>
-obtained from Stage 1.</li>
+obtained from Stage 1. For “plugin”, may also be a numeric vector of
+length <code>n</code> containing a point estimate of <span class="math inline">\(\zeta\)</span> obtained from Stage 1.</li>
 <li><strong>locs</strong>: A numeric matrix of dimension
 <code>n × 2</code> specifying spatial coordinates <span class="math inline">\((x_1, x_2)\)</span> for each location. Used only
 when model = “AIS_copula”.</li>
