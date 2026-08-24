@@ -1,8 +1,9 @@
 ---
 title: "Descriptions of Generalized IS Functions"
-output: html_document
-header-includes:
-  - \usepackage{bm}
+output:
+  pdf_document: default
+  html_document: default
+header-includes: \usepackage{bm}
 ---
 
 # `gen_IS_fun`
@@ -175,7 +176,7 @@ A numeric vector of length `n` representing the selected draw of $\zeta$ from `z
 
 # `transform_to_z`
 
-Transforms candidate $\zeta$ draws from their original scale into standard Gaussian latent variables $Z∼N(0,1)$. Uses a continuous piecewise-linear Probability Integral Transform (PIT) via empirical CDF interpolation.
+Transforms candidate $\zeta$ draws from their original scale into standard Gaussian latent variables $Z~N(0,1)$. Uses a continuous piecewise-linear Probability Integral Transform (PIT) via empirical CDF interpolation.
 
 
 ### Usage
