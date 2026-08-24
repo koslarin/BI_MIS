@@ -1,0 +1,357 @@
+---
+title: "Descriptions of Generalized IS Functions"
+output: html_document
+header-includes:
+  - \usepackage{bm}
+---
+
+# `gen_IS_fun`
+
+Generalized function for running plug-in posteriors, IIS, and AIS.
+
+### Usage
+
+```{r, eval=FALSE}
+gen_IS_fun(y, 
+           x = NULL, 
+           sample_params, 
+           init_params, 
+           lik_fun = NULL, 
+           model = c("AIS", "IIS", "plugin", "AIS_copula"), 
+           zeta_ppd, 
+           locs = NULL, 
+           R = 100, 
+           m_vecchia = 20, 
+           mcmc_samples = 1000, 
+           burn_in = 1000)   
+```
+
+### Arguments
+
+* **y**: A numeric vector of length `n` containing outcome data
+* **x**: A `n x p` matrix representing known fixed-effect covariate predictors. Defaults to `NULL`
+* **sample_params**: A function used to sample model-level parameters. Inputs `y`, `x`, current draw `zeta_sam`, and a named list `params`containing current draw of model-level parameters we are conditioning on.
+* **init_params**: A function returning a named list of initial values for model parameters.
+* **lik_fun**: A function evaluating an `S x n` log-likelihood matrix of `y` conditioned on Stage 1 partial posterior draws and current parameters. Defaults to `NULL` and is not used by the plug-in method.
+* **model**: A character string specifying the sampling algorithm. Accepted options are:
+  + "plugin": Fixed spatial latent process, set to Stage 1 posterior means by default.
+  + "IIS": Independent Importance Sampling.
+  + "AIS": Adjusted Importance Sampling.
+  + "AIS_copula": Adjusted Importance Sampling with continuous Empirical CDF transformation, spatial Gaussian Copula, and Vecchia likelihood re-weighting.
+* **zeta_ppd**: A numeric matrix of dimension `S × n` containing `S` posterior predictive draws of unobserved variable $\zeta$ obtained from Stage 1.
+* **locs**: A numeric matrix of dimension `n × 2` specifying spatial coordinates $(x_1, x_2)$ for each location. Used only when model = "AIS_copula".
+* **R**: An integer defining the number of discrete candidate draws resampled in the second sampling stage of AIS. Defaults to 300.
+* **m_vecchia**: An integer defining the maximum number of nearest neighbors utilized in the Vecchia approximation for spatial covariance likelihood calculation. Defaults to 20. Used only when model = "AIS_copula".
+* **mcmc_samples**: An integer specifying the total number of MCMC iterations. Defaults to 1000.
+* **burn_in**: An integer specifying the number of initial MCMC iterations to discard as burn-in. Defaults to 1000.
+
+### Value 
+
+A named list containing post-burn-in MCMC samples (length `M`):
+
+* $theta$: A numeric vector of length M containing posterior draws for the coefficient $\theta$ for the unobserved predictor $\zeta$.
+* $beta$: A numeric matrix of dimension `M x p` containing posterior draws for known covariate regression parameters $X$ (returned if `x` is provided).
+* **sigma_y_sq / r**: A numeric vector of length M containing posterior draws for residual observation variance $\sigma^2_\epsilon$ (Normal) or dispersion size parameter $r$ (Negative Binomial).
+* **zeta_sam**: A numeric matrix of dimension `M × n` containing posterior samples of $\zeta$.
+
+Other outputs can exist for custom `sample_params`, `init_params`, and `lik_fun`.
+
+
+# `init_params_normal`
+
+Generates initial starting values for regression coefficients for known predictors ($\beta$), the regression coefficient for unobserved $\zeta$ ($\theta$), and the Gaussian residual variance ($\sigma^2_\epsilon$).
+
+### Usage
+
+```{r, eval=FALSE}
+init_params_normal(y, x = NULL, zeta_ppd)
+```
+
+### Arguments
+
+* **y**: A numeric vector of length `n` containing outcome data
+* **x**: A `n x p` matrix representing known fixed-effect covariate predictors. Defaults to `NULL`
+* **zeta_ppd**: A numeric matrix of dimension `S × n` containing `S` posterior predictive draws of unobserved variable $\zeta$ obtained from Stage 1.
+
+### Value 
+
+A named list containing:
+* **beta**: Initial covariate coefficients (numeric vector of length p).
+* **theta**: Initial spatial scale parameter (scalar initialized to `1.0`).
+* **sigma_y_sq**: Initial residual variance (scalar initialized to `1.0`).
+
+# `sample_params_normal`
+
+Executes a conjugate Normal-Inverse-Gamma Gibbs sampling step for standard linear regression parameters and observation noise variance conditional on the current draw of $\zeta$.
+
+### Usage
+
+```{r, eval=FALSE}
+sample_params_normal(
+  y, 
+  x = NULL, 
+  zeta_sam, 
+  params, 
+  prior_prec = 0.001, 
+  a_sigma = 0.001, 
+  b_sigma = 0.001
+)
+```
+
+### Arguments
+
+* **y**: A numeric vector of length `n` containing outcome data
+* **x**: A `n x p` matrix representing known fixed-effect covariate predictors. Defaults to `NULL`
+* **zeta_sam**: A numeric vector of length `n` representing the current draws of $\zeta$. 
+* **params**: A named list containing current parameter values (`beta`, `theta`, `sigma_y_sq`).
+* **prior_prec**: Prior precision scalar for the Gaussian prior on regression parameters. Defaults to `0.001`.
+* **a_sigma**: Inverse-Gamma shape hyperparameter for $\sigma^2_\epsilon$. Defaults to `0.001`.
+* **b_sigma**: Inverse-Gamma rate hyperparameter for $\sigma^2_\epsilon$. Defaults to `0.001`.
+
+### Value 
+
+A named list containing updated parameter values (`beta`, `theta`, `sigma_y_sq`).
+
+# `lik_fun_normal`
+
+Evaluates the pointwise Gaussian log-likelihood matrix of continuous outcome vector y across all `S` Stage 1 partial posterior draws of $\zeta$ under current parameter values.
+
+### Usage
+
+```{r, eval=FALSE}
+lik_fun_normal(y, x = NULL, zeta_ppd, params)
+```
+
+### Arguments
+
+* **y**: A numeric vector of length `n` containing outcome data
+* **x**: A `n x p` matrix representing known fixed-effect covariate predictors. Defaults to `NULL`
+* **zeta_ppd**: A numeric `S x n` matrix containing Stage 1 partial posterior draws of $\zeta$. 
+* **params**: A named list containing current parameter values (`beta`, `theta`, `sigma_y_sq`).
+
+### Value 
+
+A numeric matrix of dimension `S × n` containing log-likelihood values.
+
+# `sample_zeta_iis`
+
+Draws a single vector $\zeta_{sam}$ using Independent Importance Sampling (IIS).
+
+### Usage
+
+```{r, eval=FALSE}
+sample_zeta_iis(log_lik, zeta_ppd)
+```
+
+### Arguments
+
+* **log_lik**: A numeric matrix of dimension `S × n` containing log-likelihood values evaluated by `lik_fun`.
+* **zeta_ppd**: A numeric `S x n` matrix containing Stage 1 partial posterior draws of $\zeta$. 
+
+### Value 
+
+A numeric vector of length `n` representing the selected draw of $\zeta$ from `zeta_ppd`.
+
+# `sample_zeta_ais`
+
+Performs Adjusted Importance Sampling (AIS) without spatial copula or Vecchia re-weighting.
+
+### Usage
+
+```{r, eval=FALSE}
+sample_zeta_ais(log_lik, zeta_ppd, R = 300)
+```
+
+### Arguments
+
+* **log_lik**: A numeric matrix of dimension `S × n` containing log-likelihood values evaluated by `lik_fun`.
+* **zeta_ppd**: A numeric `S x n` matrix containing Stage 1 partial posterior draws of $\zeta$. 
+* **R**: An integer defining the number of discrete candidate draws resampled in the second sampling stage of AIS. Defaults to 300.
+
+### Value 
+
+A numeric vector of length `n` representing the selected draw of $\zeta$ from `zeta_ppd`.
+
+
+# `transform_to_z`
+
+Transforms candidate $\zeta$ draws from their original scale into standard Gaussian latent variables $Z∼N(0,1)$. Uses a continuous piecewise-linear Probability Integral Transform (PIT) via empirical CDF interpolation.
+
+
+### Usage
+
+```{r, eval=FALSE}
+transform_to_z(zeta_mat, sorted_zeta_ppd)
+```
+
+### Arguments
+
+* **zeta_mat**: A numeric matrix of dimension `R x n` containing `R` candidate draws across `n` spatial locations.
+* **sorted_zeta_ppd**: A numeric matrix of dimension `S x n` containing sorted Stage 1 partial posterior draws for each location.
+
+### Value 
+
+A numeric matrix of dimension `R x n` containing transformed standard normal Z-scores.
+
+# `sample_zeta_ais_copula_vecchia`
+
+Executes two-layer Adjusted Importance Sampling (AIS). Layer 1 samples candidate draws based on pointwise likelihoods; Layer 2 adjusts proposal weights using a spatial Gaussian copula density evaluated via the Vecchia approximation.
+
+### Usage
+
+```{r, eval=FALSE}
+sample_zeta_ais_copula_vecchia(
+  log_lik, 
+  zeta_ppd, 
+  sorted_zeta_ppd, 
+  locs, 
+  covparms, 
+  NNarray, 
+  R = 300, 
+  m = 20
+)
+```
+
+### Arguments
+
+* **log_lik**: A numeric matrix of dimension `S × n` containing pointwise log-likelihood values evaluated by `lik_fun`.
+* **zeta_ppd**: A numeric matrix of dimension `S × n` containing Stage 1 partial posterior draws.
+* **sorted_zeta_ppd**: A numeric matrix of dimension `S × n` containing column-sorted Stage 1 draws.
+* **locs**: A numeric matrix of dimension `n × 2` specifying spatial coordinates.
+* **covparms**: A numeric vector specifying spatial covariance parameters (variance, range, smoothness, nugget).
+* **NNarray**: An integer matrix of dimension `n × m` containing pre-computed ordered nearest-neighbor indices generated by `GpGp::find_ordered_nn`.
+* **R**: An integer specifying the number of draws taken from the proposal distribution for AIS. Defaults to `300`.
+* **m**: An integer specifying the maximum number of nearest neighbors in the Vecchia approximation. Defaults to `20`.
+
+### Value 
+
+A numeric vector of length `n` representing the selected $\zeta_{sam}$ for the current MCMC iteration.
+
+# `init_params_negbin`
+
+Generates initial values for regression parameters $(\beta,\theta)$ and the Negative Binomial size parameter $r$.
+
+### Usage
+
+```{r, eval=FALSE}
+init_params_negbin(y, x = NULL, zeta_ppd)
+```
+
+### Arguments
+
+* **y**: A numeric vector of length `n` containing outcome count data
+* **x**: A `n x p` matrix containing known fixed covariates. Defaults to `NULL`
+* **zeta_ppd**: A numeric matrix of dimension `S × n` containing Stage 1 partial posterior draws.
+
+### Value 
+
+A named list containing:
+
+* **beta**: Initial covariate coefficients (numeric vector of length p).
+* **theta**: Initial spatial scale parameter (scalar initialized to 1.0).
+* **r**: Initial dispersion/size parameter (scalar initialized to 2.0).
+
+# `lik_fun_negbin`
+
+Evaluates the pointwise log-likelihood matrix of Negative Binomial outcomes across all partial posterior draws of $\zeta$ and current parameter values.
+
+### Usage
+
+```{r, eval=FALSE}
+lik_fun_negbin(y, x = NULL, zeta_ppd, params)
+```
+
+### Arguments
+
+* **y**: A numeric vector of length `n` containing outcome count data
+* **x**: A `n x p` matrix containing known fixed covariates. Defaults to `NULL`.
+* **zeta_ppd**: A numeric matrix of dimension `S × n` containing Stage 1 partial posterior draws.
+* **params**: A named list containing current parameter values (`beta`, `theta`, `r`).
+
+### Value 
+
+A numeric matrix of dimension `S x n` containing log-likelihood values.
+
+# `slice_sample_r`
+
+Updates the Negative Binomial dispersion parameter r using a 1D univariate slice sampler under a Cauchy-like prior $p(r) \propto (1+r^2e_0)^{-1}$ 
+
+### Usage
+
+```{r, eval=FALSE}
+slice_sample_r(r_curr, y, eta, e0 = 0.01, a_r = 0.001, b_r = 100)
+```
+
+### Arguments
+
+* **r_curr**: Numeric scalar representing the current state of `r`.
+* **y**: A numeric vector of length `n` containing outcome count data
+* **eta**: A numeric vector of length `n` containing current linear predictor values $\eta = X\beta +\theta\zeta$.
+* **e0**: Prior hyperparameter scale factor. Defaults to `0.01`.
+* **a_r**: Numeric lower bound for r. Defaults to `0.001`.
+* **b_r**: Numeric upper bound for r. Defaults to `100`.
+
+### Value 
+
+A numeric scalar representing the updated sample of r.
+
+# `sample_params_negbin`
+
+Implements a Gibbs sampler step for Negative Binomial model parameters. Uses Polya-Gamma latent auxiliary variables ($\omega_i \sim PG$)  to sample regression parameters $(\beta,\theta)$ conditionally from Gaussian distributions, followed by a slice sampling step for dispersion parameter `r`.
+
+### Usage
+
+```{r, eval=FALSE}
+sample_params_negbin(
+  y, 
+  x = NULL, 
+  zeta_sam, 
+  params, 
+  prior_prec = 0.001, 
+  e0 = 0.01, 
+  a_r = 0.001, 
+  b_r = 100
+)
+```
+
+### Arguments
+
+* **y**: A numeric vector of length `n` containing outcome count data
+* **x**: A `n x p` matrix containing known fixed covariates. Defaults to `NULL`.
+* **zeta_sam**: A numeric vector of length `n` representing the current sampled draws of $\zeta$.
+* **params**: A named list containing current parameter values (`beta`, `theta`, `r`).
+* **prior_prec**: Prior precision scalar for Gaussian regression coefficients. Defaults to `0.001`.
+* **e0**: Prior hyperparameter scale factor. Defaults to `0.01`.
+* **a_r**: Numeric lower bound for r. Defaults to `0.001`.
+* **b_r**: Numeric upper bound for r. Defaults to `100`.
+
+### Value 
+
+A named list containing updated parameter values (`beta`, `theta`, `r`).
+
+
+# `setup_copula_cache`
+
+Pre-computes and caches persistent structures required for Layer 2 spatial Gaussian copula evaluations in AIS_copula. This includes sorting Stage 1 draws for continuous empirical CDF mapping, constructing Vecchia nearest-neighbor arrays, and fitting spatial covariance parameters with standardized Z-space variance and an explicit nugget parameter floor to prevent spatial over-smoothing.
+
+### Usage
+
+```{r, eval=FALSE}
+setup_copula_cache(zeta_ppd, locs, m_vecchia = 20, nugget_prop = 0.10)
+```
+
+### Arguments
+
+* **zeta_ppd**: A numeric matrix of dimension `S × n` containing Stage 1 partial posterior draws.
+* **locs**: A numeric matrix of dimension `n × 2` specifying spatial coordinates.
+* **m_vecchia**: An integer defining the maximum number of nearest neighbors utilized in the Vecchia approximation for spatial covariance likelihood calculation. Defaults to 20.
+* **nugget_prop**: A numeric scalar in `[0,1)` defining the proportion of total Z-space marginal variance allocated to the nugget floor. Defaults to `0.10` (10% nugget). used to prevent over-smoothing.
+
+### Value 
+
+A named list containing:
+
+* **sorted_zeta_ppd**: A numeric matrix of dimension `S x n` containing sorted Stage 1 partial posterior draws for each location used by transform_to_z for fast interpolated Probability Integral Transforms (PIT).
+* **NNarray**: An integer matrix of dimension `n × m` containing ordered nearest-neighbor indices generated by `GpGp::find_ordered_nn`.
+* **covparms**: A numeric vector of specifying spatial covariance parameters (variance, range, nugget).
+
