@@ -372,9 +372,9 @@ setup_copula_cache <- function(zeta_ppd, locs, m_vecchia = 20, nugget_prop = 0.1
   # In Z-space, total marginal variance must equal 1.0.
   # Partition variance into: Partial Sill (1 - nugget_prop) + Nugget (nugget_prop)
   covparms_adjusted <- c(
-    variance = 1.0 - nugget_prop,  # Partial sill (here, 0.90)
+    variance = 1.0 - nugget_prop,  # Partial sill (by default, 0.90)
     range    = fitted_range,       # Fitted spatial scale
-    nugget   = nugget_prop         # Nugget floor (here, 0.10)
+    nugget   = nugget_prop         # Nugget floor (by default, 0.10)
   )
   
   list(
