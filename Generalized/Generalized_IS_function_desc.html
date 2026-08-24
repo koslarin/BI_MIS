@@ -433,12 +433,12 @@ initial MCMC iterations to discard as burn-in. Defaults to 1000.</li>
 <p>A named list containing post-burn-in MCMC samples (length
 <code>M</code>):</p>
 <ul>
-<li><span class="math inline">\(theta\)</span>: A numeric vector of
-length M containing posterior draws for the coefficient <span class="math inline">\(\theta\)</span> for the unobserved predictor <span class="math inline">\(\zeta\)</span>.</li>
-<li><span class="math inline">\(beta\)</span>: A numeric matrix of
-dimension <code>M x p</code> containing posterior draws for known
-covariate regression parameters <span class="math inline">\(X\)</span>
-(returned if <code>x</code> is provided).</li>
+<li><strong>theta</strong>: A numeric vector of length M containing
+posterior draws for the coefficient <span class="math inline">\(\theta\)</span> for the unobserved predictor <span class="math inline">\(\zeta\)</span>.</li>
+<li><strong>beta</strong>: A numeric matrix of dimension
+<code>M x p</code> containing posterior draws for known covariate
+regression parameters <span class="math inline">\(X\)</span> (returned
+if <code>x</code> is provided).</li>
 <li><strong>sigma_y_sq / r</strong>: A numeric vector of length M
 containing posterior draws for residual observation variance <span class="math inline">\(\sigma^2_\epsilon\)</span> (Normal) or dispersion
 size parameter <span class="math inline">\(r\)</span> (Negative

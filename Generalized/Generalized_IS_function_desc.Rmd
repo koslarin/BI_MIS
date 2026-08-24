@@ -1,8 +1,8 @@
 ---
 title: "Descriptions of Generalized IS Functions"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 header-includes: \usepackage{bm}
 ---
 
@@ -50,8 +50,8 @@ gen_IS_fun(y,
 
 A named list containing post-burn-in MCMC samples (length `M`):
 
-* $theta$: A numeric vector of length M containing posterior draws for the coefficient $\theta$ for the unobserved predictor $\zeta$.
-* $beta$: A numeric matrix of dimension `M x p` containing posterior draws for known covariate regression parameters $X$ (returned if `x` is provided).
+* **theta**: A numeric vector of length M containing posterior draws for the coefficient $\theta$ for the unobserved predictor $\zeta$.
+* **beta**: A numeric matrix of dimension `M x p` containing posterior draws for known covariate regression parameters $X$ (returned if `x` is provided).
 * **sigma_y_sq / r**: A numeric vector of length M containing posterior draws for residual observation variance $\sigma^2_\epsilon$ (Normal) or dispersion size parameter $r$ (Negative Binomial).
 * **zeta_sam**: A numeric matrix of dimension `M × n` containing posterior samples of $\zeta$.
 
