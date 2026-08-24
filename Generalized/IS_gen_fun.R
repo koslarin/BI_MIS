@@ -279,7 +279,7 @@ transform_to_z = function(zeta_mat, sorted_zeta_ppd) {
       y = u_grid, 
       method = "linear", 
       rule = 2,  # Clamps out-of-bounds candidates safely to grid limits
-      ties = "ordered" #don't check for ties, should be better for ecdf # ties = mean is another option
+      ties = list("ordered", mean) #should be better for ecdf # ties = "ordered" is another option
     )
     
     u_raw <- ecdf_smooth(zeta_mat[, h])
